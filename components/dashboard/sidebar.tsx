@@ -13,19 +13,33 @@ import {
   Zap,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { SettingsDialog } from "@/components/dashboard/dialogs"
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", active: true },
-  { icon: Users, label: "Contactos", active: false },
-  { icon: FolderKanban, label: "Proyectos", active: false },
-  { icon: CalendarCheck, label: "Acciones", active: false },
-  { icon: BarChart3, label: "Analíticas", active: false },
-  { icon: Settings, label: "Ajustes", active: false },
+  { icon: LayoutDashboard, label: "Dashboard", target: "dashboard" },
+  { icon: Users, label: "Contactos", target: "contactos" },
+  { icon: FolderKanban, label: "Proyectos", target: "proyectos" },
+  { icon: CalendarCheck, label: "Acciones", target: "acciones" },
+  { icon: BarChart3, label: "Analíticas", target: "analiticas" },
+  { icon: Settings, label: "Ajustes", target: null },
 ]
 
 export function DashboardSidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+
+  const handleNav = (index: number) => {
+    const item = navItems[index]
+    if (!item.target) {
+      setSettingsOpen(true)
+      return
+    }
+    setActiveIndex(index)
+    document
+      .getElementById(item.target)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
 
   return (
     <aside
@@ -63,7 +77,7 @@ export function DashboardSidebar() {
         {navItems.map((item, index) => (
           <button
             key={item.label}
-            onClick={() => setActiveIndex(index)}
+            onClick={() => handleNav(index)}
             className={cn(
               "group relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all",
               index === activeIndex
@@ -117,6 +131,8 @@ export function DashboardSidebar() {
           <ChevronLeft className="h-3 w-3" />
         )}
       </button>
+
+      <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </aside>
   )
 }

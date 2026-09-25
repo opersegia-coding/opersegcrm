@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import {
   MoreHorizontal,
   Mail,
@@ -29,7 +29,14 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import { formatCurrency, type Contact, type ContactType, type ProjectStatus } from "@/lib/crm-data"
+import { useCrm } from "@/components/crm-provider"
+import { ContactDetailsDialog } from "@/components/dashboard/dialogs"
+import {
+  formatCurrency,
+  type Contact,
+  type ContactType,
+  type ProjectStatus,
+} from "@/lib/crm-data"
 
 interface ContactsTableProps {
   contacts: Contact[]
@@ -49,13 +56,66 @@ const statusColors: Record<ProjectStatus, string> = {
   Perdido: "bg-destructive/20 text-destructive",
 }
 
-export function ContactsTable({ contacts }: ContactsTableProps) {
-  const [filter, setFilter] = useState<ContactType | "Todos">("Todos")
+const PAGE_SIZE = 8
 
-  const filteredContacts =
-    filter === "Todos"
-      ? contacts
-      : contacts.filter((c) => c.tipo === filter)
+type SortMode = "none" | "asc" | "desc"
+
+const sortLabels: Record<SortMode, string> = {
+  none: "Ordenar",
+  asc: "A → Z",
+  desc: "Z → A",
+}
+
+export function ContactsTable({ contacts }: ContactsTableProps) {
+  const { search, deleteContact } = useCrm()
+  const [filter, setFilter] = useState<ContactType | "Todos">("Todos")
+  const [sort, setSort] = useState<SortMode>("none")
+  const [page, setPage] = useState(0)
+  const [selected, setSelected] = useState<Contact | null>(null)
+
+  const filteredContacts = useMemo(() => {
+    let list = contacts
+    if (filter !== "Todos") list = list.filter((c) => c.tipo === filter)
+    const query = search.trim().toLowerCase()
+    if (query) {
+      list = list.filter((c) =>
+        [
+          c.nombre,
+          c.apellido,
+          c.email,
+          c.organizacion,
+          c.cargo,
+          c.tipo,
+          c.estadoProyecto ?? "",
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(query)
+      )
+    }
+    if (sort !== "none") {
+      list = [...list].sort((a, b) => {
+        const nameA = `${a.nombre} ${a.apellido}`.toLowerCase()
+        const nameB = `${b.nombre} ${b.apellido}`.toLowerCase()
+        return sort === "asc"
+          ? nameA.localeCompare(nameB)
+          : nameB.localeCompare(nameA)
+      })
+    }
+    return list
+  }, [contacts, filter, search, sort])
+
+  const pageCount = Math.max(1, Math.ceil(filteredContacts.length / PAGE_SIZE))
+  const safePage = Math.min(page, pageCount - 1)
+  const pageContacts = filteredContacts.slice(
+    safePage * PAGE_SIZE,
+    safePage * PAGE_SIZE + PAGE_SIZE
+  )
+
+  const cycleSort = () => {
+    setSort((prev) => (prev === "none" ? "asc" : prev === "asc" ? "desc" : "none"))
+    setPage(0)
+  }
 
   return (
     <Card className="border-border bg-card">
@@ -80,16 +140,24 @@ export function ContactsTable({ contacts }: ContactsTableProps) {
                 {["Todos", "Lead", "Cliente", "Prospecto", "Socio"].map((type) => (
                   <DropdownMenuItem
                     key={type}
-                    onClick={() => setFilter(type as ContactType | "Todos")}
+                    onClick={() => {
+                      setFilter(type as ContactType | "Todos")
+                      setPage(0)
+                    }}
                   >
                     {type}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={cycleSort}
+            >
               <ArrowUpDown className="h-4 w-4" />
-              Ordenar
+              {sortLabels[sort]}
             </Button>
           </div>
         </div>
@@ -121,10 +189,22 @@ export function ContactsTable({ contacts }: ContactsTableProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredContacts.slice(0, 8).map((contact) => (
+              {pageContacts.length === 0 && (
+                <TableRow className="border-border hover:bg-transparent">
+                  <TableCell
+                    colSpan={7}
+                    className="py-10 text-center text-sm text-muted-foreground"
+                  >
+                    No se encontraron contactos
+                    {search ? ` para "${search}"` : ""}.
+                  </TableCell>
+                </TableRow>
+              )}
+              {pageContacts.map((contact) => (
                 <TableRow
                   key={contact.id}
-                  className="group border-border transition-colors hover:bg-secondary/30"
+                  className="group cursor-pointer border-border transition-colors hover:bg-secondary/30"
+                  onClick={() => setSelected(contact)}
                 >
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -199,21 +279,38 @@ export function ContactsTable({ contacts }: ContactsTableProps) {
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
+                      <DropdownMenuContent
+                        align="end"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <DropdownMenuItem
+                          onClick={() =>
+                            (window.location.href = `mailto:${contact.email}`)
+                          }
+                        >
                           <Mail className="mr-2 h-4 w-4" />
                           Enviar Email
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            (window.location.href = `tel:${contact.telefono}`)
+                          }
+                        >
                           <Phone className="mr-2 h-4 w-4" />
                           Llamar
                         </DropdownMenuItem>
-                        <DropdownMenuItem>Ver Detalles</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
+                        <DropdownMenuItem onClick={() => setSelected(contact)}>
+                          Ver Detalles
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onClick={() => deleteContact(contact.id)}
+                        >
                           Eliminar
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -228,7 +325,7 @@ export function ContactsTable({ contacts }: ContactsTableProps) {
           <p className="text-xs text-muted-foreground">
             Mostrando{" "}
             <span className="font-medium text-foreground">
-              {Math.min(8, filteredContacts.length)}
+              {pageContacts.length}
             </span>{" "}
             de{" "}
             <span className="font-medium text-foreground">
@@ -236,16 +333,34 @@ export function ContactsTable({ contacts }: ContactsTableProps) {
             </span>{" "}
             contactos
           </p>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={safePage === 0}
+              onClick={() => setPage(safePage - 1)}
+            >
               Anterior
             </Button>
-            <Button variant="outline" size="sm">
+            <span className="font-mono text-xs text-muted-foreground">
+              {safePage + 1} / {pageCount}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={safePage >= pageCount - 1}
+              onClick={() => setPage(safePage + 1)}
+            >
               Siguiente
             </Button>
           </div>
         </div>
       </CardContent>
+
+      <ContactDetailsDialog
+        contact={selected}
+        onClose={() => setSelected(null)}
+      />
     </Card>
   )
 }

@@ -1,5 +1,7 @@
 "use client"
 
+import { useState } from "react"
+import { toast } from "sonner"
 import {
   Clock,
   CalendarDays,
@@ -19,7 +21,19 @@ interface ActivityFeedProps {
 }
 
 export function ActivityFeed({ contacts }: ActivityFeedProps) {
-  const upcomingActions = getUpcomingActions(contacts)
+  const [showAll, setShowAll] = useState(false)
+  const [completed, setCompleted] = useState<string[]>([])
+
+  const pending = contacts.filter((c) => !completed.includes(c.id))
+  const all = getUpcomingActions(pending)
+  const upcomingActions = showAll ? all : all.slice(0, 5)
+
+  const markDone = (contact: Contact) => {
+    setCompleted((prev) => [...prev, contact.id])
+    toast.success("Acción completada", {
+      description: `${contact.nextAction} — ${contact.nombre} ${contact.apellido}`,
+    })
+  }
 
   return (
     <Card className="border-border bg-card">
@@ -97,7 +111,9 @@ export function ActivityFeed({ contacts }: ActivityFeedProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+                  title="Marcar como completada"
+                  onClick={() => markDone(contact)}
+                  className="h-8 w-8 shrink-0 opacity-0 transition-opacity hover:text-primary group-hover:opacity-100"
                 >
                   <CheckCircle2 className="h-4 w-4" />
                 </Button>
@@ -106,13 +122,24 @@ export function ActivityFeed({ contacts }: ActivityFeedProps) {
           )
         })}
 
-        <Button
-          variant="ghost"
-          className="w-full justify-center gap-2 text-muted-foreground hover:text-foreground"
-        >
-          Ver todas las acciones
-          <ArrowRight className="h-4 w-4" />
-        </Button>
+        {upcomingActions.length === 0 && (
+          <p className="py-6 text-center text-sm text-muted-foreground">
+            No hay acciones pendientes. ¡Todo al día!
+          </p>
+        )}
+
+        {all.length > 5 && (
+          <Button
+            variant="ghost"
+            onClick={() => setShowAll((prev) => !prev)}
+            className="w-full justify-center gap-2 text-muted-foreground hover:text-foreground"
+          >
+            {showAll ? "Ver menos" : `Ver todas las acciones (${all.length})`}
+            <ArrowRight
+              className={cn("h-4 w-4 transition-transform", showAll && "rotate-90")}
+            />
+          </Button>
+        )}
       </CardContent>
     </Card>
   )
