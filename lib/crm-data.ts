@@ -311,7 +311,7 @@ export function formatCurrency(value: number) {
   const digits = Math.abs(roundedValue).toString()
   const groupedDigits = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
 
-  return `${sign}€${groupedDigits}`
+  return `${sign}$${groupedDigits}`
 }
 
 export function getValueByOrganization(contacts: Contact[]) {

@@ -202,7 +202,7 @@ export function Charts({ contacts }: ChartsProps) {
                   tick={{ fill: "oklch(0.6 0 0)", fontSize: 11 }}
                   axisLine={{ stroke: "oklch(0.25 0.02 250)" }}
                   tickLine={false}
-                  tickFormatter={(value) => `€${value}`}
+                  tickFormatter={(value) => `$${value}`}
                 />
                 <YAxis
                   type="category"
