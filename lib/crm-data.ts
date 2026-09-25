@@ -304,6 +304,11 @@ export function getTotalValue(contacts: Contact[]) {
   return contacts.reduce((sum, c) => sum + (c.valorProyecto || 0), 0)
 }
 
+// Keep server and browser output identical regardless of runtime locale.
+export function formatCurrency(value: number) {
+  return `€${value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`
+}
+
 export function getValueByOrganization(contacts: Contact[]) {
   const orgValues: Record<string, number> = {}
   contacts.forEach((c) => {

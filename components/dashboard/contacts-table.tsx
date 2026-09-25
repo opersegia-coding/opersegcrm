@@ -29,7 +29,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import type { Contact, ContactType, ProjectStatus } from "@/lib/crm-data"
+import { formatCurrency, type Contact, type ContactType, type ProjectStatus } from "@/lib/crm-data"
 
 interface ContactsTableProps {
   contacts: Contact[]
@@ -181,7 +181,7 @@ export function ContactsTable({ contacts }: ContactsTableProps) {
                   <TableCell>
                     {contact.valorProyecto ? (
                       <span className="font-mono text-sm font-medium text-primary">
-                        €{contact.valorProyecto.toLocaleString("de-DE")}
+                        {formatCurrency(contact.valorProyecto)}
                       </span>
                     ) : (
                       <span className="text-xs text-muted-foreground">—</span>

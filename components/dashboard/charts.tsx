@@ -17,6 +17,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { Contact } from "@/lib/crm-data"
 import {
+  formatCurrency,
   getMonthlyData,
   getValueByOrganization,
   getProjectsByStatus,
@@ -218,7 +219,7 @@ export function Charts({ contacts }: ChartsProps) {
                     borderRadius: "8px",
                     fontSize: "12px",
                   }}
-                  formatter={(value: number) => [`€${value.toLocaleString("de-DE")}`, "Valor"]}
+                  formatter={(value: number) => [formatCurrency(value), "Valor"]}
                 />
                 <Bar
                   dataKey="value"

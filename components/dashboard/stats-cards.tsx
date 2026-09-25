@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import type { Contact } from "@/lib/crm-data"
 import {
+  formatCurrency,
   getContactsByType,
   getProjectsByStatus,
   getTotalValue,
@@ -37,7 +38,7 @@ export function StatsCards({ contacts }: StatsCardsProps) {
     },
     {
       label: "Valor Pipeline",
-      value: `€${totalValue.toLocaleString("de-DE")}`,
+      value: formatCurrency(totalValue),
       subValue: `${Object.values(byStatus).reduce((a, b) => a + b, 0)} proyectos activos`,
       icon: Target,
       color: "accent",
