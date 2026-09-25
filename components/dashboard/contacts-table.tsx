@@ -181,7 +181,7 @@ export function ContactsTable({ contacts }: ContactsTableProps) {
                   <TableCell>
                     {contact.valorProyecto ? (
                       <span className="font-mono text-sm font-medium text-primary">
-                        €{contact.valorProyecto.toLocaleString()}
+                        €{contact.valorProyecto.toLocaleString("de-DE")}
                       </span>
                     ) : (
                       <span className="text-xs text-muted-foreground">—</span>

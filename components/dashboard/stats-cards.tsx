@@ -37,7 +37,7 @@ export function StatsCards({ contacts }: StatsCardsProps) {
     },
     {
       label: "Valor Pipeline",
-      value: `€${totalValue.toLocaleString()}`,
+      value: `€${totalValue.toLocaleString("de-DE")}`,
       subValue: `${Object.values(byStatus).reduce((a, b) => a + b, 0)} proyectos activos`,
       icon: Target,
       color: "accent",

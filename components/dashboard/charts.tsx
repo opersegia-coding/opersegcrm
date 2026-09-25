@@ -218,7 +218,7 @@ export function Charts({ contacts }: ChartsProps) {
                     borderRadius: "8px",
                     fontSize: "12px",
                   }}
-                  formatter={(value: number) => [`€${value.toLocaleString()}`, "Valor"]}
+                  formatter={(value: number) => [`€${value.toLocaleString("de-DE")}`, "Valor"]}
                 />
                 <Bar
                   dataKey="value"
