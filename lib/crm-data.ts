@@ -306,7 +306,12 @@ export function getTotalValue(contacts: Contact[]) {
 
 // Keep server and browser output identical regardless of runtime locale.
 export function formatCurrency(value: number) {
-  return `€${value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`
+  const roundedValue = Math.round(value)
+  const sign = roundedValue < 0 ? "-" : ""
+  const digits = Math.abs(roundedValue).toString()
+  const groupedDigits = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+
+  return `${sign}€${groupedDigits}`
 }
 
 export function getValueByOrganization(contacts: Contact[]) {
