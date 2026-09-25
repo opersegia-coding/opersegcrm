@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { Users, Target, TrendingUp, AlertCircle } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
@@ -32,6 +33,7 @@ export function StatsCards({ contacts }: StatsCardsProps) {
       color: "primary",
       trend: "+12%",
       trendUp: true,
+      href: "#contactos",
     },
     {
       label: "Valor Pipeline",
@@ -41,6 +43,7 @@ export function StatsCards({ contacts }: StatsCardsProps) {
       color: "accent",
       trend: "+8.5%",
       trendUp: true,
+      href: "#proyectos",
     },
     {
       label: "Tasa Conversión",
@@ -50,6 +53,7 @@ export function StatsCards({ contacts }: StatsCardsProps) {
       color: "primary",
       trend: "+3.2%",
       trendUp: true,
+      href: "#analiticas",
     },
     {
       label: "Acciones Pendientes",
@@ -59,16 +63,15 @@ export function StatsCards({ contacts }: StatsCardsProps) {
       color: "warning",
       trend: "-2",
       trendUp: false,
+      href: "#acciones",
     },
   ]
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat) => (
-        <Card
-          key={stat.label}
-          className="group relative overflow-hidden border-border bg-card transition-all hover:border-primary/30"
-        >
+        <Link key={stat.label} href={stat.href} className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+        <Card className="group relative overflow-hidden border-border bg-card transition-all hover:border-primary/30">
           {/* Gradient accent */}
           <div
             className={cn(
@@ -121,6 +124,7 @@ export function StatsCards({ contacts }: StatsCardsProps) {
           {/* Hover effect */}
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
         </Card>
+      </Link>
       ))}
     </div>
   )

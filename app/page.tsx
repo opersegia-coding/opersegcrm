@@ -48,25 +48,33 @@ export default function DashboardPage() {
             {/* Stats cards */}
             <StatsCards contacts={contacts} />
 
+            {/* Quick access directly below metrics */}
+            <QuickActions />
+
             {/* Charts */}
-            <Charts contacts={contacts} />
+            <section id="analiticas">
+              <Charts contacts={contacts} />
+            </section>
 
             {/* Two column layout */}
             <div className="grid gap-6 lg:grid-cols-3">
               {/* Left column - Table */}
-              <div className="lg:col-span-2">
+              <div id="contactos" className="lg:col-span-2">
                 <ContactsTable contacts={contacts} />
               </div>
 
               {/* Right column */}
               <div className="space-y-6">
-                <PipelineFunnel contacts={contacts} />
-                <QuickActions />
+                <section id="proyectos">
+                  <PipelineFunnel contacts={contacts} />
+                </section>
               </div>
             </div>
 
             {/* Activity feed */}
-            <ActivityFeed contacts={contacts} />
+            <section id="acciones">
+              <ActivityFeed contacts={contacts} />
+            </section>
 
             {/* Footer */}
             <footer className="border-t border-border pt-6">

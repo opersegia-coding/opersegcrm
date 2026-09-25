@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import {
   UserPlus,
   FileText,
@@ -51,8 +52,15 @@ const actions = [
 ]
 
 export function QuickActions() {
+  const [selectedAction, setSelectedAction] = useState<string | null>(null)
+
   return (
     <Card className="border-border bg-card">
+      {selectedAction && (
+        <div className="mx-6 mt-4 rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-xs text-primary">
+          Demo activo: {selectedAction}. La acción se ha preparado correctamente.
+        </div>
+      )}
       <CardHeader className="pb-3">
         <div>
           <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -66,6 +74,8 @@ export function QuickActions() {
           {actions.map((action) => (
             <button
               key={action.label}
+              type="button"
+              onClick={() => setSelectedAction(action.label)}
               className={cn(
                 "group flex flex-col items-center gap-2 rounded-lg border border-border p-4 text-center transition-all",
                 "hover:border-primary/30 hover:bg-secondary/50"
